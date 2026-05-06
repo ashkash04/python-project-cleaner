@@ -61,23 +61,6 @@ It works on Python project folders opened in VS Code.
 
 This extension does not currently contribute any VS Code settings.
 
-## Known Issues
-
-- The extension currently scans folders synchronously.
-- Very large projects may take longer to scan.
-- The health score is based on a simple MVP scoring system.
-- The extension currently reports `__pycache__` folders but does not delete them yet.
-
-## Roadmap
-
-Planned features include:
-
-- Delete `__pycache__` folders from the workspace
-- Improve error handling for unreadable folders
-- Add project cleanup commands
-- Detect additional Python project issues
-- Improve the health scoring system
-
 ## Release Notes
 
 ### 0.1.0
