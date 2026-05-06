@@ -2,7 +2,7 @@
   "name": "python-project-cleaner",
   "displayName": "python-project-cleaner",
   "description": "A VS Code extension for cleaning and auditing Python projects.",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.118.0"
   },

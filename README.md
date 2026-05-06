@@ -80,6 +80,21 @@ Planned features include:
 
 ## Release Notes
 
+### 0.1.0
+
+Expanded MVP release.
+
+Added:
+
+- Command to delete `__pycache__` folders
+- Confirmation dialog before deleting cache folders
+- Command to create a starter Python `.gitignore`
+- Command to create a starter `requirements.txt`
+- Safer recursive folder scanning
+- Error handling for unreadable folders during cache scans
+- Shared workspace root helper to reduce repeated command logic
+- TSDoc comments for core helper functions
+
 ### 0.0.1
 
 Initial MVP release.
