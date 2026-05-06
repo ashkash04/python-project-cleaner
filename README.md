@@ -1,71 +1,95 @@
-# python-project-cleaner README
+# Python Project Cleaner
 
-This is the README for your extension "python-project-cleaner". After writing up a brief description, we recommend including the following sections.
+Python Project Cleaner is a VS Code extension that scans a Python workspace and generates a simple project health report.
+
+This extension is currently an MVP and is not published yet. It focuses on detecting common Python project hygiene issues such as missing dependency files, missing virtual environments, and Python cache folders.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Run Python Project Health Check
 
-For example if there is an image subfolder under your extension project workspace:
+The extension adds a command:
 
-\!\[feature X\]\(images/feature-x.png\)
+```text
+Python Project Cleaner: Run Health Check
+```
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+The health check scans the currently opened workspace and reports:
+
+- Whether a `.gitignore` file exists
+- Whether a Python dependency file exists:
+    - `requirements.txt`
+    - `pyproject.toml`
+- Whether a virtual environment folder exists:
+    - `.venv`
+    - `venv`
+    - `env`
+- How many `__pycache__` folders were found
+- A calculated project health score
+- A list of warnings
+
+The report opens as a Markdown document inside VS Code.
+
+## Example Report
+
+```md
+# Python Project Health Report
+
+**Score:** 75/100
+**Workspace:** C:\Users\example\Desktop\my-python-project
+
+## Checks
+
+- ✅ .gitignore found
+- ✅ Dependency file found
+- ❌ Virtual environment missing
+- ⚠️ Python cache folders: 2
+
+## Warnings
+
+- No virtual environment folder found.
+- 2 Python cache folder(s) found.
+```
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+This extension does not require any external dependencies to use.
+
+It works on Python project folders opened in VS Code.
 
 ## Extension Settings
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+This extension does not currently contribute any VS Code settings.
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+- The extension currently scans folders synchronously.
+- Very large projects may take longer to scan.
+- The health score is based on a simple MVP scoring system.
+- The extension currently reports `__pycache__` folders but does not delete them yet.
+
+## Roadmap
+
+Planned features include:
+
+- Delete `__pycache__` folders from the workspace
+- Improve error handling for unreadable folders
+- Add project cleanup commands
+- Detect additional Python project issues
+- Improve the health scoring system
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
+Initial MVP release.
 
-Initial release of ...
+Added:
 
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
----
-
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- Python project health check command
+- Markdown health report generation
+- `.gitignore` detection
+- Dependency file detection
+- Virtual environment detection
+- `__pycache__` folder detection
+- Basic health score calculation
