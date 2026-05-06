@@ -15,6 +15,18 @@
       {
         "command": "python-project-cleaner.runHealthCheck",
         "title": "Python Project Cleaner: Run Health Check"
+      },
+      {
+        "command": "python-project-cleaner.deleteCacheFolders",
+        "title": "Python Project Cleaner: Delete __pycache__ Folders"
+      },
+      {
+        "command": "python-project-cleaner.createGitIgnore",
+        "title": "Python Project Cleaner: Create Python .gitignore"
+      },
+      {
+        "command": "python-project-cleaner.createRequirementsFile",
+        "title": "Python Project Cleaner: Create requirments.txt"
       }
     ]
   },
