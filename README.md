@@ -109,8 +109,6 @@ This extension does not currently contribute any VS Code settings.
 
 ## Release Notes
 
-### 0.1.0
-
 See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
 Current milestone: `0.2.0`
