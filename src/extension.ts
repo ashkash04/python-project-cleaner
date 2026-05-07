@@ -10,9 +10,12 @@ type HealthReport = {
 	score: number;
 	workspaceRoot: string;
 	cacheFoldersFound: number;
+	largeFilesFound: number;
+	largeFilePaths: string[];
 	hasGitIgnore: boolean;
 	hasDependencyFile: boolean;
 	hasVirtualEnvironment: boolean;
+	hasReadme: boolean;
 	warnings: string[];
 };
 
@@ -65,6 +68,65 @@ function findCacheFolders(directoryPath: string): string[] {
 
 
 /**
+ * Recursively finds large files inside a workspace.
+ * 
+ * Virtual environments, `.git`, and cache folders are skipped because they can
+ * contain many generated files that are not useful for this project-level scan.
+ * 
+ * @param directoryPath - Absolute path of the directory in use.
+ * @param sizeLimitBytes - Minimum file size in bytes to report.
+ * @returns Absolute paths of files larger than the size limit.
+ */
+function findLargeFiles(directoryPath: string, sizeLimitBytes: number): string[] {
+	const largeFilePaths: string[] = [];
+
+	let entries: fs.Dirent[];
+
+	try {
+		entries = fs.readdirSync(directoryPath, { withFileTypes: true });
+	} catch {
+		return largeFilePaths;
+	}
+
+	for (const entry of entries) {
+		const fullPath = path.join(directoryPath, entry.name);
+
+		if (entry.isDirectory()) {
+			if (
+				entry.name === '.venv' ||
+				entry.name === 'venv' ||
+				entry.name === 'env' ||
+				entry.name === '.git' ||
+				entry.name === '__pycache__'
+			) {
+				continue;
+			}
+
+			const nestedLargeFilePaths = findLargeFiles(fullPath, sizeLimitBytes);
+			largeFilePaths.push(...nestedLargeFilePaths);
+			continue;
+		}
+
+		if (!entry.isFile()) {
+			continue;
+		}
+
+		try {
+			const stats = fs.statSync(fullPath);
+
+			if (stats.size >= sizeLimitBytes) {
+				largeFilePaths.push(fullPath);
+			}
+		} catch {
+			continue;
+		}
+	}
+
+	return largeFilePaths;
+}
+
+
+/**
  * Calculates a simple MVP health score for a Python workspace.
  * 
  * The score starts at 100 and subtracts points for missing project hygiene
@@ -78,7 +140,9 @@ function calculateHealthScore(reportInput: {
 	hasGitIgnore: boolean;
 	hasDependencyFile: boolean;
 	hasVirtualEnvironment: boolean;
+	hasReadme: boolean;
 	cacheFoldersFound: number;
+	largeFilesFound: number;
 }): number {
 	let score = 100;
 
@@ -94,11 +158,56 @@ function calculateHealthScore(reportInput: {
 		score -= 25;
 	}
 
+	if (!reportInput.hasReadme) {
+		score -= 10;
+	}
+
 	if (reportInput.cacheFoldersFound > 0) {
 		score -= Math.min(reportInput.cacheFoldersFound * 5, 25);
 	}
 
+	if (reportInput.largeFilesFound > 0) {
+		score -= Math.min(reportInput.largeFilesFound * 5, 20);
+	}
+
 	return Math.max(score, 0);
+}
+
+
+/**
+ * Build suggested actions based on health report warnings.
+ * 
+ * @param report - Health report data for the current workspace.
+ * @returns Suggested fixes for detected project issues.
+ */
+function buildSuggestedFixes(report: HealthReport): string[] {
+	const fixes: string[] = [];
+
+	if (!report.hasGitIgnore) {
+		fixes.push('Run `Python Project Cleaner: Create Python .gitignore`.');
+	}
+
+	if (!report.hasDependencyFile) {
+		fixes.push('Run `Python Project Cleaner: Create requirements.txt`.');
+	}
+
+	if (!report.hasVirtualEnvironment) {
+		fixes.push('Create a virtual environment with `python -m venv .venv`.');
+	}
+
+	if (!report.hasReadme) {
+		fixes.push('Add a `README.md` file describing the project.');
+	}
+
+	if (report.cacheFoldersFound > 0) {
+		fixes.push('Run `Python Project Cleaner: Delete __pycache__ Folders`.');
+	}
+
+	if (report.largeFilesFound > 0) {
+		fixes.push('Consider moving large files out of the repository or using Git LFS.');
+	}
+
+	return fixes;
 }
 
 
@@ -120,7 +229,9 @@ function buildMarkdownReport(report: HealthReport): string {
 		`- ${report.hasGitIgnore ? '✅' : '❌'} .gitignore ${report.hasGitIgnore ? 'found': 'missing'}`,
 		`- ${report.hasDependencyFile ? '✅' : '❌'} Dependency file ${report.hasDependencyFile ? 'found' : 'missing'}`,
 		`- ${report.hasVirtualEnvironment ? '✅' : '❌'} Virtual environment ${report.hasVirtualEnvironment ? 'found' : 'missing'}`,
+		`- ${report.hasReadme ? '✅' : '❌'} README.md ${report.hasReadme ? 'found' : 'missing'}`,
 		`- ${report.cacheFoldersFound === 0 ? '✅' : '⚠️'} Python cache folders: ${report.cacheFoldersFound}`,
+		`- ${report.largeFilesFound === 0 ? '✅' : '⚠️'} Large files: ${report.largeFilesFound}`,
 		'',
 		'## Warnings',
 		''
@@ -131,6 +242,28 @@ function buildMarkdownReport(report: HealthReport): string {
 	} else {
 		for (const warning of report.warnings) {
 			lines.push(`- ${warning}`);
+		}
+	}
+
+	if (report.largeFilePaths.length > 0) {
+		lines.push('');
+		lines.push('## Large Files');
+		lines.push('');
+
+		for (const largeFilePath of report.largeFilePaths) {
+			lines.push(`- ${largeFilePath}`);
+		}
+	}
+
+	const suggestedFixes = buildSuggestedFixes(report);
+
+	if (suggestedFixes.length > 0) {
+		lines.push('');
+		lines.push('## Suggested Fixes');
+		lines.push('');
+
+		for (const fix of suggestedFixes) {
+			lines.push(`- ${fix}`);
 		}
 	}
 
@@ -218,6 +351,116 @@ function getWorkspaceRoot(): string | undefined {
 }
 
 
+/**
+ * Scans a Python workspace and builds a health report.
+ * 
+ * @param workspaceRoot - Absolute path of the workspace to scan.
+ * @returns Health report for the workspace.
+ */
+function scanPythonWorkspace(workspaceRoot: string): HealthReport {
+	const gitignorePath = path.join(workspaceRoot, '.gitignore');
+	const hasGitIgnore = fs.existsSync(gitignorePath);
+
+	const requirementsPath = path.join(workspaceRoot, 'requirements.txt');
+	const hasRequirementsFile = fs.existsSync(requirementsPath);
+
+	const pyProjectPath = path.join(workspaceRoot, 'pyproject.toml');
+	const hasPyProjectFile = fs.existsSync(pyProjectPath);
+	const hasDependencyFile = hasRequirementsFile || hasPyProjectFile;
+
+	const virtualEnvironmentNames = ['.venv', 'venv', 'env'];
+	const hasVirtualEnvironment = virtualEnvironmentNames.some((folderName) => {
+		const folderPath = path.join(workspaceRoot, folderName);
+		return fs.existsSync(folderPath) && fs.statSync(folderPath).isDirectory();
+	});
+
+	const readmePath = path.join(workspaceRoot, 'README.md');
+	const hasReadme = fs.existsSync(readmePath);
+
+	const cacheFolderPaths = findCacheFolders(workspaceRoot);
+	const cacheFoldersFound = cacheFolderPaths.length;
+
+	const largeFileLimitBytes = 10 * 1024 * 1024;
+	const largeFilePaths = findLargeFiles(workspaceRoot, largeFileLimitBytes);
+	const largeFilesFound = largeFilePaths.length;
+
+	const score = calculateHealthScore({
+		hasGitIgnore: hasGitIgnore,
+		hasDependencyFile: hasDependencyFile,
+		hasVirtualEnvironment: hasVirtualEnvironment,
+		hasReadme: hasReadme,
+		cacheFoldersFound: cacheFoldersFound,
+		largeFilesFound: largeFilesFound
+	});
+
+	return {
+		score: score,
+		workspaceRoot: workspaceRoot,
+		cacheFoldersFound: cacheFoldersFound,
+		hasGitIgnore: hasGitIgnore,
+		hasDependencyFile: hasDependencyFile,
+		hasVirtualEnvironment: hasVirtualEnvironment,
+		hasReadme: hasReadme,
+		largeFilesFound: largeFilesFound,
+		largeFilePaths: largeFilePaths,
+		warnings: [
+			...(!hasGitIgnore ? ['No .gitignore file found.'] : []),
+			...(!hasDependencyFile ? ['No requirements.txt or pyproject.toml file found.'] : []),
+			...(!hasVirtualEnvironment ? ['No virtual environment folder found.'] : []),
+			...(!hasReadme ? ['No README.md file found.'] : []),
+			...(cacheFoldersFound > 0 ? [`${cacheFoldersFound} Python cache folder(s) found.`] : []),
+			...(largeFilesFound > 0 ? [`${largeFilesFound} large file(s) found over 10 MB.`] : [])
+		]
+	};
+}
+
+
+/**
+ * Deletes folders and returns the number of successfully deleted folders.
+ * 
+ * Delete failures are skipped so one locked or unreadable folder does not stop
+ * the entire cleanup command.
+ * 
+ * @param folderPaths - Absolute paths of folders to delete
+ * @returns Number of folders successfully deleted.
+ */
+function deleteFolders(folderPaths: string[]): number {
+	let deletedCount = 0;
+
+	for (const folderPath of folderPaths) {
+		try {
+			fs.rmSync(folderPath, {
+				recursive: true,
+				force: true,
+			});
+
+			deletedCount++;
+		} catch {
+			continue;
+		}
+	}
+
+	return deletedCount;
+}
+
+
+/**
+ * Writes text content to a file.
+ * 
+ * @param filePath - Absolute path of the file to write.
+ * @param content - Text content to write.
+ * @returns `true` is the file was written successfully, otherwise `false`.
+ */
+function writeTextFile(filePath: string, content: string): boolean {
+	try {
+		fs.writeFileSync(filePath, content, 'utf8');
+		return true;
+	} catch {
+		return false;
+	}
+}
+
+
 export function activate(context: vscode.ExtensionContext) {
 
 	console.log('Congratulations, your extension "python-project-cleaner" is now active!');
@@ -229,46 +472,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		const gitignorePath = path.join(workspaceRoot, '.gitignore');
-		const hasGitIgnore = fs.existsSync(gitignorePath);
-
-		const requirementsPath = path.join(workspaceRoot, 'requirements.txt');
-		const hasRequirementsFile = fs.existsSync(requirementsPath);
-
-		const pyProjectPath = path.join(workspaceRoot, 'pyproject.toml');
-		const hasPyProjectFile = fs.existsSync(pyProjectPath);
-		const hasDependencyFile = hasRequirementsFile || hasPyProjectFile;
-
-		const virtualEnvironmentNames = ['.venv', 'venv', 'env'];
-		const hasVirtualEnvironment = virtualEnvironmentNames.some((folderName) => {
-			const folderPath = path.join(workspaceRoot, folderName);
-			return fs.existsSync(folderPath) && fs.statSync(folderPath).isDirectory();
-		});
-
-		const cacheFolderPaths = findCacheFolders(workspaceRoot);
-		const cacheFoldersFound = cacheFolderPaths.length;
-
-		const score = calculateHealthScore({
-			hasGitIgnore: hasGitIgnore,
-			hasDependencyFile: hasDependencyFile,
-			hasVirtualEnvironment: hasVirtualEnvironment,
-			cacheFoldersFound: cacheFoldersFound
-		});
-		
-		const report: HealthReport = {
-			score: score,
-			workspaceRoot: workspaceRoot,
-			cacheFoldersFound: cacheFoldersFound,
-			hasGitIgnore: hasGitIgnore,
-			hasDependencyFile: hasDependencyFile,
-			hasVirtualEnvironment: hasVirtualEnvironment,
-			warnings: [
-				...(!hasGitIgnore ? ['No .gitignore file found.'] : []),
-				...(!hasDependencyFile ? ['No requirements.txt or pyproject.toml file found.'] : []),
-				...(!hasVirtualEnvironment ? ['No virtual environment folder found.'] : []),
-				...(cacheFoldersFound > 0 ? [`${cacheFoldersFound} Python cache folder(s) found.`] : [])
-			]
-		};
+		const report = scanPythonWorkspace(workspaceRoot);
 
 		const markdownReport = buildMarkdownReport(report);
 
@@ -280,7 +484,6 @@ export function activate(context: vscode.ExtensionContext) {
 		await vscode.window.showTextDocument(document);
 	});
 
-	
 	const deleteCacheFoldersDisposable = vscode.commands.registerCommand('python-project-cleaner.deleteCacheFolders', async () => {
 		const workspaceRoot = getWorkspaceRoot();
 
@@ -305,16 +508,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 		}
 
-		let deletedCount = 0;
-
-		for (const cacheFolderPath of cacheFolderPaths) {
-			fs.rmSync(cacheFolderPath, {
-				recursive: true,
-				force: true
-			});
-
-			deletedCount++;
-		}
+		const deletedCount = deleteFolders(cacheFolderPaths);
 
 		vscode.window.showInformationMessage(`Deleted ${deletedCount} Python cache folder(s).`);
 	});
@@ -345,7 +539,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const gitignoreContent = buildPythonGitIgnoreContent();
 
-		fs.writeFileSync(gitignorePath, gitignoreContent, 'utf8');
+		const wasCreated = writeTextFile(gitignorePath, gitignoreContent);
+
+		if (!wasCreated) {
+			vscode.window.showErrorMessage('Failed to create .gitignore.');
+			return;
+		}
 
 		const document = await vscode.workspace.openTextDocument(gitignorePath);
 		await vscode.window.showTextDocument(document);
@@ -385,7 +584,12 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const requirementsContent = buildRequirementsFileContent();
 
-		fs.writeFileSync(requirementsPath, requirementsContent, 'utf8');
+		const wasCreated = writeTextFile(requirementsPath, requirementsContent);
+
+		if (!wasCreated) {
+			vscode.window.showErrorMessage('Failed to create requirements.txt.');
+			return;
+		}
 
 		const document = await vscode.workspace.openTextDocument(requirementsPath);
 		await vscode.window.showTextDocument(document);
