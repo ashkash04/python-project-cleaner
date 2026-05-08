@@ -2,6 +2,8 @@
 
 Python Project Cleaner is a VS Code extension that scans a Python workspace and generates a simple project health report.
 
+**[Install from the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ashkash04.python-project-cleaner)**
+
 This extension is a developer tool for scanning Python workspaces and identifying common project hygiene issues, including dependency file detection, virtual environment detection, Python cache folder detection, README detection, large file detection, and basic cleanup commands.
 
 ## Features
