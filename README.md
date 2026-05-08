@@ -26,7 +26,7 @@ The health check scans the currently opened workspace and reports:
   - `env`
 - Whether a `README.md` file exists
 - How many `__pycache__` folders were found
-- How many large files over the configured threshold were found
+- How many large files at or above the configured threshold were found
 - A calculated project health score
 - A list of warnings
 - Suggested fixes for detected issues
@@ -62,6 +62,32 @@ Python Project Cleaner: Create requirements.txt
 ```
 
 This command creates a starter `requirements.txt` file if neither `requirements.txt` nor `pyproject.toml` already exists.
+
+## Screenshots
+
+### Health Report
+
+The health check opens a Markdown report with a score, detected issues, warnings, large files, and suggested fixes.
+
+![Health report example](images/healthReportExample.png)
+
+### Command Palette
+
+All extension actions are available from the VS Code Command Palette.
+
+![Command Palette commands](images/commandPaletteCommands.png)
+
+### Safe Cache Cleanup
+
+The cache cleanup command asks for confirmation before deleting detected `__pycache__` folders.
+
+![Delete cache confirmation](images/deletePythonCacheFolders.png)
+
+### Configuration
+
+The extension supports configurable large file thresholds and ignored folders.
+
+![Configuration JSON](images/configurationJSON.png)
 
 ## Example Health Report
 

@@ -1,16 +1,23 @@
 {
   "name": "python-project-cleaner",
-  "displayName": "python-project-cleaner",
-  "description": "A VS Code extension for cleaning and auditing Python projects.",
-  "version": "0.3.0",
+  "displayName": "Python Project Cleaner",
+  "description": "Scan and clean Python projects by detecting missing project files, cache folders, large files, and common hygiene issues.",
+  "version": "1.0.0",
+  "publisher": "ashkash04",
+  "icon": "images/icon.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/ashkash04/python-project-cleaner.git"
   },
+  "bugs": {
+    "url": "https://github.com/ashkash04/python-project-cleaner/issues"
+  },
+  "homepage": "https://github.com/ashkash04/python-project-cleaner#readme",
   "engines": {
     "vscode": "^1.118.0"
   },
   "categories": [
+    "Linters",
     "Other"
   ],
   "keywords": [
@@ -41,7 +48,7 @@
       },
       {
         "command": "python-project-cleaner.createRequirementsFile",
-        "title": "Python Project Cleaner: Create requirments.txt"
+        "title": "Python Project Cleaner: Create requirements.txt"
       }
     ],
     "configuration": {
@@ -78,7 +85,9 @@
     "lint": "eslint src",
     "pretest": "npm run compile && npm run lint",
     "test": "mocha --ui tdd \"out/test/**/*.test.js\"",
-    "test:vscode": "vscode-test"
+    "test:vscode": "vscode-test",
+    "package:precheck": "npm test",
+    "package": "vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -86,6 +95,7 @@
     "@types/vscode": "^1.118.0",
     "@vscode/test-cli": "^0.0.12",
     "@vscode/test-electron": "^2.5.2",
+    "@vscode/vsce": "^3.9.1",
     "eslint": "^9.39.3",
     "mocha": "^11.7.5",
     "typescript": "^5.9.3",
