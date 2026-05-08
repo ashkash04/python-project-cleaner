@@ -170,7 +170,7 @@ Remaining before publishing:
 
 See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
-Current milestone: `0.3.0`
+Current milestone: `1.0.0`
 
 ## License
 

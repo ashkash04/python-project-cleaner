@@ -4,13 +4,29 @@ All notable changes to the Python Project Cleaner extension will be documented i
 
 This project follows milestone-based versioning during early development.
 
-## [Unreleased]
+## [Released]
 
 ### Planned
 
-- Add screenshots or GIFs to the README
-- Package and test the extension locally as a `.vsix`
-- Add configurable scan settings
+- Dependency import analysis
+- Unused dependency detection
+- Optional requirements.txt generation from detected imports
+- Additional project structure checks
+
+## [1.0.0]
+
+### Added
+
+- Initial published release of Python Project Cleaner
+- Marketplace-ready extension icon
+- README screenshots
+- Local VSIX packaging workflow
+- Final package metadata for publishing
+
+### Changed
+
+- Updated documentation for public release
+- Promoted the extension from MVP milestone status to first stable release
 
 ## [0.3.0]
 
