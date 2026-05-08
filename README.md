@@ -2,7 +2,7 @@
 
 Python Project Cleaner is a VS Code extension that scans a Python workspace and generates a simple project health report.
 
-This extension is currently an unpublished MVP. It is still in early development and is not published to the VS Code Marketplace yet. It focuses on practical Python project hygiene checks, including dependency file detection, virtual environment detection, Python cache folder detection, README detection, large file detection, and basic cleanup commands.
+This extension is a developer tool for scanning Python workspaces and identifying common project hygiene issues, including dependency file detection, virtual environment detection, Python cache folder detection, README detection, large file detection, and basic cleanup commands.
 
 ## Features
 
@@ -110,7 +110,7 @@ The extension supports configurable large file thresholds and ignored folders.
 
 - No virtual environment folder found.
 - 2 Python cache folder(s) found.
-- 1 large file(s) found over 10 MiB.
+- 1 large file(s) found at or above 10 MiB.
 
 ## Large Files
 
@@ -138,39 +138,27 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-- The extension currently scans folders synchronously.
-- Very large projects may take longer to scan.
-- The health score is based on a simple MVP scoring system.
-- The extension does not yet auto-generate dependency lists from imports.
-- The extension does not yet detect unused dependencies.
+- The extension scans folders synchronously, so very large workspaces may take longer to analyze.
+- The health score is heuristic and should be treated as a general project hygiene estimate, not a definitive quality score.
+- Large file detection is based on file size only and does not determine whether a large file is intentionally tracked.
+- The extension detects whether dependency files exist, but it does not yet validate dependency correctness.
+- The extension does not yet analyze Python imports, auto-generate dependency lists, or detect unused dependencies.
 
 ## Roadmap
 
-Completed in early milestones:
+Planned future improvements:
 
-- Python workspace health report
-- `__pycache__` detection and deletion
-- `.gitignore` generation
-- `requirements.txt` generation
-- README.md detection
-- Large file detection
-- Suggested fixes in health reports
-- Configurable large file threshold
-- Configurable ignored folders
-- Codebase split into focused modules
-- Basic unit tests for core helper functions
-
-Remaining before publishing:
-
-- Add screenshots or GIFs to the README
-- Package and test a local `.vsix` build
-- Final Marketplace metadata review
+- Dependency import analysis
+- Unused dependency detection
+- Optional requirements.txt generation from detected imports
+- Additional project structure checks
+- More configurable health scoring
 
 ## Release Notes
 
 See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
-Current milestone: `1.0.0`
+Current release: `1.0.0`
 
 ## License
 

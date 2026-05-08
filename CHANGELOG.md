@@ -4,7 +4,7 @@ All notable changes to the Python Project Cleaner extension will be documented i
 
 This project follows milestone-based versioning during early development.
 
-## [Released]
+## [Unreleased]
 
 ### Planned
 
@@ -53,8 +53,8 @@ This project follows milestone-based versioning during early development.
 ### Added
 
 - README.md detection in the health check
-- Large file detection for files over 10 MB
-- Large file selection in the Markdown health report
+- Large file detection for files over 10 MiB
+- Large files section in the Markdown health report
 - Suggested Fixes section in the Markdown health report
 - Safer deletion helper for cache cleanup
 - Safer file writing helper for generated files
