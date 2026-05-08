@@ -8,12 +8,29 @@ This project follows milestone-based versioning during early development.
 
 ### Planned
 
-- Split `extension.ts` into smaller command, scanner, report, and utility modules
-- Add tests for core helper functions
-- Improve package metadata before publishing
 - Add screenshots or GIFs to the README
 - Package and test the extension locally as a `.vsix`
 - Add configurable scan settings
+
+## [0.3.0]
+
+### Added
+
+- Basic unit tests for core helper functions
+- Configurable large file threshold setting
+- Configurable ignored folders setting
+- MIT license
+
+### Changed
+
+- Split `extension.ts` into focused modules
+- Moved command logic into separate command files
+- Improved package metadata for release preparation
+- Updated README documentation for release preparation
+
+### Removed
+
+- Removed default scaffold test file
 
 ## [0.2.0]
 
@@ -54,5 +71,6 @@ This project follows milestone-based versioning during early development.
 - Markdown health report generation
 - `.gitignore` detection
 - Dependency file detection
+- Virtual environment detection
 - `__pycache__` folder detection
 - Basic health score calculation
