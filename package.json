@@ -2,13 +2,28 @@
   "name": "python-project-cleaner",
   "displayName": "python-project-cleaner",
   "description": "A VS Code extension for cleaning and auditing Python projects.",
-  "version": "0.1.0",
+  "version": "0.3.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ashkash04/python-project-cleaner.git"
+  },
   "engines": {
     "vscode": "^1.118.0"
   },
   "categories": [
     "Other"
   ],
+  "keywords": [
+    "python",
+    "cleanup",
+    "project health",
+    "requirements",
+    "gitignore",
+    "pycache",
+    "large files",
+    "developer tools"
+  ],
+  "license": "MIT",
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
@@ -28,24 +43,52 @@
         "command": "python-project-cleaner.createRequirementsFile",
         "title": "Python Project Cleaner: Create requirments.txt"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Python Project Cleaner",
+      "properties": {
+        "pythonProjectCleaner.largeFileThresholdMb": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "description": "Minimum file size in MiB for a file to be reported as large."
+        },
+        "pythonProjectCleaner.ignoredFolders": {
+          "type": "array",
+          "default": [
+            ".git",
+            ".venv",
+            "venv",
+            "env",
+            "node_modules",
+            "__pycache__"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "Folder names to skip while scanning the workspace."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "pretest": "npm run compile && npm run lint",
+    "test": "mocha --ui tdd \"out/test/**/*.test.js\"",
+    "test:vscode": "vscode-test"
   },
   "devDependencies": {
-    "@types/vscode": "^1.118.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
-    "typescript-eslint": "^8.56.1",
-    "eslint": "^9.39.3",
-    "typescript": "^5.9.3",
+    "@types/vscode": "^1.118.0",
     "@vscode/test-cli": "^0.0.12",
-    "@vscode/test-electron": "^2.5.2"
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.3",
+    "mocha": "^11.7.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
   }
 }
