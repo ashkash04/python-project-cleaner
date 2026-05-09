@@ -2,8 +2,6 @@
 
 Thanks for your interest in contributing to Python Project Cleaner.
 
-Python Project Cleaner is a VS Code extension for scanning Python workspaces and identifying common project hygiene issues.
-
 ## Setup
 
 Install dependencies:
