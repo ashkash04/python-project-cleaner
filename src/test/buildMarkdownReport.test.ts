@@ -14,6 +14,12 @@ function createReport(overrides: Partial<HealthReport> = {}): HealthReport {
 		hasDependencyFile: true,
 		hasVirtualEnvironment: true,
 		hasReadme: true,
+		dependencyAnalysis: {
+			importedPackages: [],
+			listedDependencies: [],
+			possibleMissingDependencies: [],
+			possibleUnusedDependencies: [],
+		},
 		warnings: [],
 		...overrides,
 	};

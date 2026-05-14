@@ -6,7 +6,9 @@ import { findCacheFolders } from './findCacheFolders';
 import { findLargeFiles } from './findLargeFiles';
 import { getLargeFileThresholdBytes } from '../utils/settings';
 import { calculateHealthScore } from './calculateHealthScore';
-
+import { findPythonImports } from './findPythonImports';
+import { parseRequirementsFile } from './parse/RequirementsFile';
+import { analyzeDependencies } from './analyzeDependencies';
 
 /**
  * Scans a Python workspace and builds a health report.
@@ -20,6 +22,14 @@ export function scanPythonWorkspace(workspaceRoot: string): HealthReport {
 
     const requirementsPath = path.join(workspaceRoot, 'requirements.txt');
     const hasRequirementsFile = fs.existsSync(requirementsPath);
+
+    const importedPackages = findPythonImports(workspaceRoot);
+
+    const listedDependencies = hasRequirementsFile
+        ? parseRequirementsFile(requirementsPath)
+        : [];
+    
+    const dependencyAnalysis = analyzeDependencies(importedPackages, listedDependencies, ['src']); // src is ignored
 
     const pyProjectPath = path.join(workspaceRoot, 'pyproject.toml');
     const hasPyProjectFile = fs.existsSync(pyProjectPath);
@@ -61,13 +71,20 @@ export function scanPythonWorkspace(workspaceRoot: string): HealthReport {
         hasReadme: hasReadme,
         largeFilesFound: largeFilesFound,
         largeFilePaths: largeFilePaths,
+        dependencyAnalysis: dependencyAnalysis,
         warnings: [
             ...(!hasGitIgnore ? ['No .gitignore file found.'] : []),
             ...(!hasDependencyFile ? ['No requirements.txt or pyproject.toml file found.'] : []),
             ...(!hasVirtualEnvironment ? ['No virtual environment folder found.'] : []),
             ...(!hasReadme ? ['No README.md file found.'] : []),
             ...(cacheFoldersFound > 0 ? [`${cacheFoldersFound} Python cache folder(s) found.`] : []),
-            ...(largeFilesFound > 0 ? [`${largeFilesFound} large file(s) found at or above ${largeFileLimitMiB} MiB.`] : [])
+            ...(largeFilesFound > 0 ? [`${largeFilesFound} large file(s) found at or above ${largeFileLimitMiB} MiB.`] : []),
+            ...(dependencyAnalysis.possibleMissingDependencies.length > 0
+                ? [`${dependencyAnalysis.possibleMissingDependencies.length} possible missing dependency issue(s) found.`]
+                : []),
+            ...(dependencyAnalysis.possibleUnusedDependencies.length > 0
+                ? [`${dependencyAnalysis.possibleUnusedDependencies.length} possible unused dependency issue(s) found.`]
+                : [])
         ]
     };
 }

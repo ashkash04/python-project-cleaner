@@ -3,6 +3,30 @@ import { buildSuggestedFixes } from "./buildSuggestedFixes";
 
 
 /**
+ * Appends a Markdown subsection containing a list of items.
+ * 
+ * If the list is empty, the subsection displays a fallback message instead.
+ * 
+ * @param lines - Markdown lines being built for the report.
+ * @param title - Subsection title to display.
+ * @param items - Items to render as Markdown bullet points.
+ */
+function addListSection(lines: string[], title: string, items: string[]): void {
+	lines.push('');
+	lines.push(`### ${title}`);
+	lines.push('');
+
+	if (items.length === 0) {
+		lines.push('None found.');
+		return;
+	}
+
+	for (const item of items) {
+		lines.push(`- ${item}`);
+	}
+}
+
+/**
  * Build the Markdown content shown after running the health check command.
  * 
  * @param report - Health report data for the current workspace.
@@ -57,6 +81,14 @@ export function buildMarkdownReport(report: HealthReport): string {
 			lines.push(`- ${fix}`);
 		}
 	}
+
+	lines.push('');
+	lines.push('## Dependency Analysis');
+
+	addListSection(lines, 'Imported Packages', report.dependencyAnalysis.importedPackages);
+	addListSection(lines, 'Listed Dependencies', report.dependencyAnalysis.listedDependencies);
+	addListSection(lines, 'Possible Missing Dependencies', report.dependencyAnalysis.possibleMissingDependencies);
+	addListSection(lines, 'Possible Unused Dependencies', report.dependencyAnalysis.possibleUnusedDependencies);
 
 	return lines.join('\n');
 }

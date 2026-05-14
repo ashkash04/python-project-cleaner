@@ -1,3 +1,14 @@
+/***
+ * Represents the found dependencies of a Python workspace.
+ */
+export type DependencyAnalysis = {
+	importedPackages: string[];
+	listedDependencies: string[];
+	possibleMissingDependencies: string[];
+	possibleUnusedDependencies: string[]
+}
+
+
 /**
  * Represents the result of scanning a Python workspace.
  */
@@ -11,5 +22,6 @@ export type HealthReport = {
 	hasDependencyFile: boolean;
 	hasVirtualEnvironment: boolean;
 	hasReadme: boolean;
+	dependencyAnalysis: DependencyAnalysis;
 	warnings: string[];
 };

@@ -2,7 +2,7 @@
   "name": "python-project-cleaner",
   "displayName": "Python Project Cleaner",
   "description": "Scan and clean Python projects by detecting missing project files, cache folders, large files, and common hygiene issues.",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "publisher": "ashkash04",
   "icon": "images/icon.png",
   "repository": {

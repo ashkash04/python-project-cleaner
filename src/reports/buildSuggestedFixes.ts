@@ -34,5 +34,13 @@ export function buildSuggestedFixes(report: HealthReport): string[] {
         fixes.push('Consider moving large files out of the repository or using Git LFS.');
     }
 
+    if (report.dependencyAnalysis.possibleMissingDependencies.length > 0) {
+        fixes.push('Review possible missing dependencies and add them to `requirements.txt` if needed.');
+    }
+
+    if (report.dependencyAnalysis.possibleUnusedDependencies.length > 0) {
+        fixes.push('Review possible unused dependencies before removing them from `requirements.txt`.');
+    }
+
     return fixes;
 }

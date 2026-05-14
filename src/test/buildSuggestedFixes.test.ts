@@ -4,19 +4,25 @@ import { buildSuggestedFixes } from '../reports/buildSuggestedFixes';
 import { HealthReport } from '../types';
 
 function createReport(overrides: Partial<HealthReport> = {}): HealthReport {
-    return {
-        score: 100,
-        workspaceRoot: 'C:\\test-project',
-        cacheFoldersFound: 0,
-        largeFilesFound: 0,
-        largeFilePaths: [],
-        hasGitIgnore: true,
-        hasDependencyFile: true,
-        hasVirtualEnvironment: true,
-        hasReadme: true,
-        warnings: [],
-        ...overrides
-    };
+	return {
+		score: 100,
+		workspaceRoot: 'C:\\test-project',
+		cacheFoldersFound: 0,
+		largeFilesFound: 0,
+		largeFilePaths: [],
+		hasGitIgnore: true,
+		hasDependencyFile: true,
+		hasVirtualEnvironment: true,
+		hasReadme: true,
+		dependencyAnalysis: {
+			importedPackages: [],
+			listedDependencies: [],
+			possibleMissingDependencies: [],
+			possibleUnusedDependencies: [],
+		},
+		warnings: [],
+		...overrides,
+	};
 }
 
 suite('buildSuggestedFixes', () => {

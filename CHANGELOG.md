@@ -8,10 +8,23 @@ This project follows milestone-based versioning during early development.
 
 ### Planned
 
-- Dependency import analysis
-- Unused dependency detection
 - Optional requirements.txt generation from detected imports
 - Additional project structure checks
+
+## [1.1.0]
+
+### Added
+
+- Dependency import analysis for Python files
+- `requirements.txt` dependency parsing
+- Possible missing dependency detection
+- Possible unused dependency detection
+- Dependency Analysis section in the Markdown health report
+- Tests for import extraction, requirements parsing, and dependency analysis
+
+### Changed
+
+- Health reports now include dependency analysis results when Python imports and dependencies are detected
 
 ## [1.0.0]
 

@@ -1,166 +1,221 @@
 # Python Project Cleaner
 
-Python Project Cleaner is a VS Code extension that scans a Python workspace and generates a simple project health report.
+**Python Project Cleaner** is a VS Code extension that scans Python workspaces and generates a simple project health report.
+
+It helps catch common project cleanup issues like missing `.gitignore` files, missing dependency files, `__pycache__` folders, large files, missing README files, and possible dependency mismatches.
 
 **[Install from the VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ashkash04.python-project-cleaner)**
 
-This extension is a developer tool for scanning Python workspaces and identifying common project hygiene issues, including dependency file detection, virtual environment detection, Python cache folder detection, README detection, large file detection, and basic cleanup commands.
+---
 
-## Features
+## Overview
 
-### Run Python Project Health Check
+Python Project Cleaner is built for developers who want a quick way to inspect the structure and hygiene of a Python project directly inside VS Code.
 
-The extension adds the command:
+It currently checks for:
 
-```text
-Python Project Cleaner: Run Health Check
-```
+- Missing `.gitignore`
+- Missing `requirements.txt` or `pyproject.toml`
+- Missing virtual environment folder
+- Missing `README.md`
+- Python `__pycache__` folders
+- Large files at or above a configurable threshold
+- Possible missing dependencies based on Python imports
+- Possible unused dependencies listed in `requirements.txt`
 
-The health check scans the currently opened workspace and reports:
+It also includes helper commands to clean up cache folders and generate starter project files.
 
-- Whether a `.gitignore` file exists
-- Whether a Python dependency file exists:
-  - `requirements.txt`
-  - `pyproject.toml`
-- Whether a virtual environment folder exists:
-  - `.venv`
-  - `venv`
-  - `env`
-- Whether a `README.md` file exists
-- How many `__pycache__` folders were found
-- How many large files at or above the configured threshold were found
-- A calculated project health score
-- A list of warnings
-- Suggested fixes for detected issues
+---
 
-The report opens as a Markdown document inside VS Code.
+## Demo
 
-### Delete Python Cache Folders
-
-The extension adds the command:
-
-```text
-Python Project Cleaner: Delete __pycache__ Folders
-```
-
-This command scans the workspace for `__pycache__` folders, asks for confirmation, and deletes the detected folders.
-
-### Create Python .gitignore
-
-The extension adds the command:
-
-```text
-Python Project Cleaner: Create Python .gitignore
-```
-
-This command creates a starter `.gitignore` file for a typical Python project if one does not already exist.
-
-### Create requirements.txt
-
-The extension adds the command:
-
-```text
-Python Project Cleaner: Create requirements.txt
-```
-
-This command creates a starter `requirements.txt` file if neither `requirements.txt` nor `pyproject.toml` already exists.
+![Python Project Cleaner demo](images/demo-health-report.gif)
 
 ## Screenshots
 
-### Health Report
-
-The health check opens a Markdown report with a score, detected issues, warnings, large files, and suggested fixes.
-
-![Health report example](images/healthReportExample.png)
-
-### Command Palette
-
-All extension actions are available from the VS Code Command Palette.
-
-![Command Palette commands](images/commandPaletteCommands.png)
-
 ### Safe Cache Cleanup
 
-The cache cleanup command asks for confirmation before deleting detected `__pycache__` folders.
+Cache cleanup asks for confirmation before deleting detected `__pycache__` folders.
 
 ![Delete cache confirmation](images/deletePythonCacheFolders.png)
 
 ### Configuration
 
-The extension supports configurable large file thresholds and ignored folders.
+Large file thresholds and ignored folders can be configured from VS Code settings.
 
 ![Configuration JSON](images/configurationJSON.png)
 
-## Example Health Report
+---
+
+## Features
+
+### Project Health Report
+
+Run:
+
+```text
+Python Project Cleaner: Run Health Check
+```
+
+The report includes:
+
+- Project health score
+- Detected project hygiene issues
+- Warning summary
+- Suggested fixes
+- Large file report
+- Dependency analysis report
+
+### Cache Folder Cleanup
+
+Run:
+
+```text
+Python Project Cleaner: Delete __pycache__ Folders
+```
+
+Scans the workspace for Python `__pycache__` folders and deletes them after confirmation.
+
+### Starter `.gitignore` Generator
+
+Run:
+
+```text
+Python Project Cleaner: Create Python .gitignore
+```
+
+Creates a starter Python `.gitignore` file if one does not already exist.
+
+### Starter `requirements.txt` Generator
+
+Run:
+
+```text
+Python Project Cleaner: Create requirements.txt
+```
+
+Creates a starter `requirements.txt` file if neither `requirements.txt` nor `pyproject.toml` exists.
+
+### Dependency Analysis
+
+Python Project Cleaner compares imports found in `.py` files against dependencies listed in `requirements.txt`.
+
+It can report:
+
+- Possible missing dependencies
+- Possible unused dependencies
+
+These results are marked as **possible** because static dependency analysis can produce false positives.
+
+---
+
+## Example Report
 
 ```md
 # Python Project Health Report
 
-**Score:** 65/100
+**Score:** 75/100
 **Workspace:** C:\Users\example\Desktop\my-python-project
 
 ## Checks
 
 - ✅ .gitignore found
 - ✅ Dependency file found
-- ❌ Virtual environment missing
+- ✅ Virtual environment found
 - ✅ README.md found
 - ⚠️ Python cache folders: 2
-- ⚠️ Large files: 1
+- ✅ Large files: 0
 
 ## Warnings
 
-- No virtual environment folder found.
 - 2 Python cache folder(s) found.
-- 1 large file(s) found at or above 10 MiB.
-
-## Large Files
-
-- C:\Users\example\Desktop\my-python-project\data\sample_video.mp4
+- 1 possible missing dependency issue(s) found.
 
 ## Suggested Fixes
 
-- Create a virtual environment with `python -m venv .venv`.
 - Run `Python Project Cleaner: Delete __pycache__ Folders`.
-- Consider moving large files out of the repository or using Git LFS.
+- Review possible missing dependencies and add them to `requirements.txt` if needed.
+
+## Dependency Analysis
+
+### Imported Packages
+
+- fastapi
+- pydantic
+- requests
+
+### Listed Dependencies
+
+- fastapi
+- pydantic
+
+### Possible Missing Dependencies
+
+- requests
+
+### Possible Unused Dependencies
+
+None found.
 ```
 
-## Requirements
-
-This extension does not require any external dependencies to use.
-
-It works on Python project folders opened in VS Code.
+---
 
 ## Extension Settings
 
-This extension contributes the following settings:
+Python Project Cleaner contributes the following settings:
 
-- `pythonProjectCleaner.largeFileThresholdMb`: Minimum file size in MiB for a file to be reported as large. Default: `10`.
-- `pythonProjectCleaner.ignoredFolders`: Folder names to skip while scanning the workspace. Default: `.git`, `.venv`, `venv`, `env`, `node_modules`, `__pycache__`.
+| Setting | Description | Default |
+|---|---|---|
+| `pythonProjectCleaner.largeFileThresholdMb` | Minimum file size in MiB for a file to be reported as large. | `10` |
+| `pythonProjectCleaner.ignoredFolders` | Folder names to skip while scanning the workspace. | `.git`, `.venv`, `venv`, `env`, `node_modules`, `__pycache__` |
 
-## Known Issues
+---
+
+## Requirements
+
+No external setup is required.
+
+Open a Python project folder in VS Code and run a Python Project Cleaner command from the Command Palette.
+
+---
+
+## Limitations
 
 - The extension scans folders synchronously, so very large workspaces may take longer to analyze.
-- The health score is heuristic and should be treated as a general project hygiene estimate, not a definitive quality score.
-- Large file detection is based on file size only and does not determine whether a large file is intentionally tracked.
-- The extension detects whether dependency files exist, but it does not yet validate dependency correctness.
-- The extension does not yet analyze Python imports, auto-generate dependency lists, or detect unused dependencies.
+- The health score is heuristic and should be treated as a general project hygiene estimate.
+- Dependency analysis is static and may produce false positives.
+- Some dependencies are used through command-line tools, plugins, dynamic imports, or framework configuration rather than direct Python imports.
+
+---
 
 ## Roadmap
 
-Planned future improvements:
+Planned improvements:
 
-- Dependency import analysis
-- Unused dependency detection
-- Optional requirements.txt generation from detected imports
+- Better dependency analysis for `pyproject.toml`
+- More accurate local module detection
+- File size display in the large file report
 - Additional project structure checks
 - More configurable health scoring
+- Optional dependency suggestions based on detected imports
+
+---
 
 ## Release Notes
 
 See [CHANGELOG.md](./CHANGELOG.md) for full version history.
 
-Current release: `1.0.0`
+Current release: `1.1.0`
+
+---
+
+## Contributing
+
+Contributions, feedback, and suggestions are welcome.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup instructions.
+
+---
 
 ## License
 
